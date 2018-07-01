@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Sistem Informasi Penjualan Meubel</title>
+
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css')}}">
+	<link rel="stylesheet" href="{{ url_for('static',filename='vendor/font-awesome/css/font-awesome.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static',filename='css/fontastic.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static',filename='css/grasp_mobile_progress_circle-1.0.0.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static',filename='vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static',filename='css/style.default.css') }}" id="theme-stylesheet">
+</head>
+<body>
+	<div class="container">
+		{% block content %} {% endblock %}
+	</div>
+	
+
+	
+	<script src="{{ url_for('static',filename='vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='vendor/popper.js/umd/popper.min.js') }}"> </script>
+    <script src="{{ url_for('static',filename='vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/grasp_mobile_progress_circle-1.0.0.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='vendor/jquery.cookie/jquery.cookie.js') }}"> </script>
+    <script src="{{ url_for('static',filename='vendor/chart.js/Chart.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='vendor/jquery-validation/jquery.validate.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js') }}"></script>
+    <!-- Main File-->
+    <script src="{{ url_for('static',filename='js/front.js') }}"></script>
+</body>
+</html>
