@@ -9,19 +9,19 @@ import barcode
 
 class Pegawai(db.Model):
 	__tablename__ = 'pegawai'
-	kode = db.Column(db.String(6), primary_key=True)
+	kode = db.Column(db.String(6), primary_key=True,nullable=False)
 	nama = db.Column(db.String(128),nullable=False)
 	username = db.Column(db.String(128),nullable=False)
-	password = db.Column(db.String(128),nullable=False)
+	password = db.Column(db.String(255),nullable=False)
 
 	def __init__(self, kode, nama, username, password):
 		self.kode = kode.upper()
 		self.nama = nama.upper()
-		self.username = username
+		self.username = username.lower()
 		self.password = generate_password_hash(password)
 
 	def __repr__(self):
-		return '<Pegawai bernama %r>' % self.nama
+		return self.nama
 
 	def check_password(self,password):
 		return check_password_hash(self.password,password)
@@ -29,21 +29,22 @@ class Pegawai(db.Model):
 
 class JenisBarang(db.Model):
 	__tablename__ = 'jenis_barang'
-	kode = db.Column(db.Integer,primary_key=True,autoincrement=True)
+	kode = db.Column(db.String(6),primary_key=True,nullable=False)
 	nama = db.Column(db.String(128),nullable=False)
 
-	def __init__(self, nama):
+	def __init__(self, kode, nama):
+		self.kode = kode
 		self.nama = nama
 
 	def __repr__(self):
-		return 'Jenis Barang %r' % self.nama
+		return self.nama
 
 
 class Barang(db.Model):
 	__tablename__ = 'barang'
-	kode = db.Column(db.Integer,primary_key=True)
+	kode = db.Column(db.String(13),primary_key=True,nullable=False)
 	nama = db.Column(db.String(128),nullable=False)
-	jenis_barang = db.Column(db.Integer,db.ForeignKey('jenis_barang.kode'))
+	jenis_barang = db.Column(db.String(6),db.ForeignKey('jenis_barang.kode'),nullable=False)
 	satuan = db.Column(db.String(32))
 	harga_beli = db.Column(db.Integer,nullable=False)
 	harga_jual = db.Column(db.Integer,nullable=False)
@@ -53,11 +54,11 @@ class Barang(db.Model):
 		EAN = barcode.get_barcode_class('ean13')
 		ean = EAN(u'{0}'.format(self.kode))
 
-	def get_kode():
-		kode = random.randint(100000000000,999999999999)
+	def get_kode(self):
+		return random.randint(100000000000,999999999999)
 
 	def __init__(self, nama, jenis_barang, satuan, harga_beli, harga_jual, stok):
-		self.kode = get_kode()
+		self.kode = str(self.get_kode())
 		self.nama = nama
 		self.jenis_barang = jenis_barang
 		self.satuan = satuan
@@ -66,47 +67,45 @@ class Barang(db.Model):
 		self.stok = stok
 
 	def __repr__(self):
-		return '{0} - {1}'.format(self.kode, self.nama)
+		return self.nama
 
 
 class Penjualan(db.Model):
 	__tablename__ = 'penjualan'
-	nota = db.Column(db.String(128),primary_key=True)
+	nota = db.Column(db.String(15),primary_key=True,nullable=False)
 	kasir = db.Column(db.String(6),db.ForeignKey('pegawai.kode'))
 	tanggal = db.Column(db.DateTime,default=datetime.datetime.utcnow,nullable=False)
 
-	def __init__(self, nota, kasir, tanggal):
-		self.nota = nota
-		self.kasir = kasir
-		self.tanggal = tanggal
+	def getNota(self):
+		return db.session.query(Penjualan).count()
+
+	def __init__(self, kasir):
+		self.nota = str(self.getNota())
+		self.kasir = kasir.upper()
+		self.tanggal = db.func.now() #datetime.datetime.utcnow()
 
 	def __repr__(self):
-		return 'nota {0} kasir {1}'.format(self.nota,self.kasir)
+		return self.nota
 
 
 class DetailPenjualan(db.Model):
 	__tablename__ = 'detail_penjualan'
 	item = db.Column(db.Integer,primary_key=True,autoincrement=True)
-	nota = db.Column(db.String(128),db.ForeignKey('penjualan.nota'))
-	barang = db.Column(db.Integer,db.ForeignKey('barang.kode'),nullable=False)
+	nota = db.Column(db.String(15),db.ForeignKey('penjualan.nota'),nullable=False)
+	barang = db.Column(db.String(13),db.ForeignKey('barang.kode'),nullable=False)
 	jumlah = db.Column(db.Integer,nullable=False)
-	total = db.Column(db.Integer,nullable=False)
 
 	def update_stok(self):
 		barang = Barang.query.filter_by(kode=self.barang).first()
 		barang.stok = barang.stok - self.jumlah
 
-	def get_total(self):
-		barang = Barang.query.filter_by(kode=self.barang).first()
-		return barang.harga_jual * self.jumlah
 
-	def __init__(self, item, nota, barang, jumlah):
-		self.item = item
+	def __init__(self, nota, barang, jumlah):
+
 		self.nota = nota
 		self.barang = barang
 		self.jumlah = jumlah
-		self.total = get_total()
-		update_stok()
+		self.update_stok()
 
 	def __repr__(self):
-		return 'nota {0} barang ke {1}'.format(self.nota, self.barang)
+		return self.nota
